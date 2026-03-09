@@ -9,6 +9,6 @@ class Config:
     # MONGODB_SETTINGS is what Flask-MongoEngine looks for this conf key
     # for setting up the connection to the database.
     MONGODB_SETTINGS = {
-        "db": "UTA_Enrollment",
+        "db": "NOU_Enrollment",
         "host": os.environ.get("MONGO_URI"),
     }

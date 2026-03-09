@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 HOST=mongodb            # Taken from docker-compose
-DB=UTA_Enrollment       # Taken from config.py
+DB=NOU_Enrollment       # Taken from config.py
 MOUNT_PATH=/mongo-setup # Taken from docker-compose
 
 # TODO: Re-add this. Broken with registration.

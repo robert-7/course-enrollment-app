@@ -1,9 +1,8 @@
-# Full Stack Flask Tutorial
+# Course Enrollment App
 
-Follows LinkedIn Learning's "Full Stack Web Development with Flask" to create
-a Flask project, set up a database system using Flask-MongoEngine, work with
-web forms, integrate Flask-Security, and create and test REST APIs using
-Postman.
+A full-stack Flask web application for course enrollment with user
+authentication, MongoDB-backed data models, REST APIs with Swagger docs,
+and a fully containerized Docker Compose setup.
 
 ## Getting Set Up
 
@@ -39,3 +38,10 @@ Please see [the setup documentation](SETUP.md) regarding this.
   developers to contribute. See [SETUP.md](SETUP.md)
 * [SETUP.md](SETUP.md) - Setup instructions for contributors
 * [TESTING.md](TESTING.md) - Instructions for manually validating the website functionality works.
+
+## Acknowledgments
+
+This project was originally based on the LinkedIn Learning course
+["Full Stack Web Development with Flask"](https://www.linkedin.com/learning/full-stack-web-development-with-flask).
+It has since been extended with Docker containerization, CI/CD pipelines,
+rebranded course data, and additional tooling.

@@ -24,39 +24,54 @@ from application.models import User
 # TODO: this should be removed, but it's still being read in
 courseData = [
     {
-        "courseID": "1111",
-        "title": "PHP 101",
-        "description": "Intro to PHP",
+        "courseID": "CSC108",
+        "title": "Introduction to Computer Programming",
+        "description": (
+            "An introduction to computer programming using Python."
+            " Program structure, control flow, data types, and functions."
+        ),
         "credits": 3,
-        "term": "Fall, Spring",
+        "term": "Fall, Winter",
     },
     {
-        "courseID": "2222",
-        "title": "Java 1",
-        "description": "Intro to Java Programming",
-        "credits": 4,
-        "term": "Spring",
+        "courseID": "CSC148",
+        "title": "Introduction to Computer Science",
+        "description": (
+            "Abstract data types, object-oriented programming,"
+            " algorithm analysis, and linked data structures."
+        ),
+        "credits": 3,
+        "term": "Fall, Winter",
     },
     {
-        "courseID": "3333",
-        "title": "Adv PHP 201",
-        "description": "Advanced PHP Programming",
+        "courseID": "CSC207",
+        "title": "Software Design",
+        "description": (
+            "Design patterns, clean architecture, version control,"
+            " and agile methodologies for building software systems."
+        ),
+        "credits": 3,
+        "term": "Fall, Winter",
+    },
+    {
+        "courseID": "CSC209",
+        "title": "Software Tools and Systems Programming",
+        "description": (
+            "Shell scripting, processes, system calls,"
+            " and C programming for Unix-based systems."
+        ),
         "credits": 3,
         "term": "Fall",
     },
     {
-        "courseID": "4444",
-        "title": "Angular 1",
-        "description": "Intro to Angular",
+        "courseID": "CSC263",
+        "title": "Data Structures and Analysis",
+        "description": (
+            "Algorithm analysis, priority queues, sorting, hashing,"
+            " amortized analysis, and graph algorithms."
+        ),
         "credits": 3,
-        "term": "Fall, Spring",
-    },
-    {
-        "courseID": "5555",
-        "title": "Java 2",
-        "description": "Advanced Java Programming",
-        "credits": 4,
-        "term": "Fall",
+        "term": "Winter",
     },
 ]
 
@@ -150,7 +165,7 @@ def logout():
 def courses(term=None):
     """Returns the courses page content."""
     if term is None:
-        term = "Spring 2019"
+        term = "Fall 2026"
     # Note: "+courseID" denotes sorting in increasing order by courseID
     classes = Course.objects.order_by("+courseID")
     return render_template("courses.html", courseData=classes, courses=True, term=term)

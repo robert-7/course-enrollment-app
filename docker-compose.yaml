@@ -9,7 +9,7 @@ services:
       - 5000:5000
     environment:
       - FLASK_ENV=development
-      - MONGO_URI=mongodb://mongodb:27017/UTA_Enrollment # TODO: this might not be needed
+      - MONGO_URI=mongodb://mongodb:27017/NOU_Enrollment # TODO: this might not be needed
     depends_on:
       - mongodb
 

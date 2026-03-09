@@ -28,8 +28,8 @@ sudo apt install ruby
 sudo gem install mdl
 
 # clone repo
-git clone git@github.com:robert-7/Full-Stack-Flask-Tutorial.git
-cd Full-Stack-Flask-Tutorial
+git clone git@github.com:robert-7/Course-Enrollment-App.git
+cd Course-Enrollment-App
 
 # set up virtualenv
 python -m venv '.venv'
@@ -45,9 +45,8 @@ pre-commit run --all-files
 
 ## Installing MongoDB
 
-Although the course instructs you to install MongoDB in your environment, I went down
-the route of installing docker first for WSL2 and then spinning up a container for this.
-Install following the installation commands
+Instead of installing MongoDB directly, this project uses Docker to run MongoDB
+in a container. Install Docker following the installation commands
 [here](https://docs.docker.com/docker-for-windows/wsl/). Verify the install with:
 
 ```bash
@@ -64,8 +63,8 @@ docker compose up -d
 To hop into the `mongodb` container and view the imported documents, run:
 
 ```bash
-# hop into our mongodb container, and begin a mongo shell with the UTA_Enrollment db selected
-docker compose exec mongodb mongo UTA_Enrollment
+# hop into our mongodb container, and begin a mongo shell with the NOU_Enrollment db selected
+docker compose exec mongodb mongo NOU_Enrollment
 db.getCollectionNames()
 db.user.find()
 ```
