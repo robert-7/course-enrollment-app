@@ -7,8 +7,10 @@ services:
     container_name: flask-app
     ports:
       - 5000:5000
+    volumes:
+      - .:/app
     environment:
-      - FLASK_ENV=development
+      - FLASK_DEBUG=true
       - MONGO_URI=mongodb://mongodb:27017/NOU_Enrollment # TODO: this might not be needed
     depends_on:
       - mongodb
