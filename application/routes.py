@@ -20,8 +20,6 @@ from application.models import Course
 from application.models import Enrollment
 from application.models import User
 
-# TODO: We should be using global strings within flash() functions
-
 
 ###################################################
 
@@ -73,7 +71,13 @@ class GetUpdateDelete(Resource):
 ###################################################
 
 
-@app.route("/")
+@app.before_request
+def redirect_root():
+    """Redirects root to /home."""
+    if request.path == "/":
+        return redirect(url_for("index"))
+
+
 @app.route("/home")
 @app.route("/index")
 def index():
@@ -174,13 +178,6 @@ def enrollment():
         title="Enrollment",
         classes=courses,
     )
-
-
-@app.route("/user")
-def user():
-    """Returns the users in our database."""
-    users = User.objects.all()
-    return render_template("user.html", users=users)
 
 
 @app.route("/favicon.ico")
