@@ -16,8 +16,8 @@ from application import app
 from application.course_list import course_list_for_user
 from application.forms import LoginForm
 from application.forms import RegisterForm
-from application.models import Course  # noqa: F401
-from application.models import Enrollment  # noqa: F401
+from application.models import Course
+from application.models import Enrollment
 from application.models import User
 
 # TODO: We should be using global strings within flash() functions
