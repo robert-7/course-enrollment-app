@@ -10,34 +10,15 @@ Please see [the setup documentation](SETUP.md) regarding this.
 
 ## Features to try
 
-* You should be able to register a user. This can be done from the `/register` path.
-* You should be able to login as a user after registering. This can be done from the
-  `/login` path.
+Please see [the testing documentation](TESTING.md) that showcases an end-to-end demo of features supported.
 
-## Folder and File Structure
+## Notes about Files and Folders
 
-* [.github/workflows](.github/workflows) - Holds the GitHub Actions files that enables
-  CI/CD software workflows
-* [.postman](.postman) - Holds files related to Postman setup for API testing
-* [.vscode](.vscode) - Holds the Visual Studio Code settings for this project
-* [application](application) - Holds the application specific code for this project
-* [mongo-setup](mongo-setup) - Holds the files needed to populate our MongoDB instance
-* [.flake8](.flake8) - Configuration file for the flake8 Python linter
-* [.flaskenv](.flaskenv) - Defines some parameters that Flask needs to run
-* [.gitignore](.gitignore) - Defines the files/folders to ignore in this repository
-* [.markdownlint.rb](.markdownlint.rb) - Configuration file for the pre-commit markdown
-  linter
-* [.markdownlint.yaml](.markdownlint.rb) - Configuration file for the GitHub Actions
-  markdown linter
-* [.pre-commit-config.yaml](.pre-commit-config.yaml) - Defines the linting plugins that
-  run before any commit. See [SETUP.md](SETUP.md)
-* [config.py](config.py) - Defines the configurations for the server
-* [LICENSE](LICENSE) - Licensing file
-* [main.py](main.py) - Calls the application's entrypoint
-* [requirements.txt](requirements.txt) - Pip package requirements for enabling
-  developers to contribute. See [SETUP.md](SETUP.md)
-* [SETUP.md](SETUP.md) - Setup instructions for contributors
-* [TESTING.md](TESTING.md) - Instructions for manually validating the website functionality works.
+Some important files and folders are seen below:
+
+* **application/** — Flask app (routes, models, forms, templates)
+* **mongo-setup/** — MongoDB seed data and initialization script
+* **Docker Compose** orchestrates the Flask app, MongoDB, and seed containers
 
 ## Acknowledgments
 
