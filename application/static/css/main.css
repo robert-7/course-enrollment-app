@@ -58,6 +58,7 @@ input[type=text]:focus, input[type=password]:focus {
     background: #ccc;
     padding:5px;
     border-bottom:2px solid #0f0f0f;
+    position: relative;
 }
 .bottom-container {
     background: #333;
@@ -105,9 +106,8 @@ footer {
 }
 
 .user {
-    float: right;
-    position: absolute;
     font-size: 25px;
-    right: 10em;
-    top: 2em;
+    margin-left: auto;
+    position: absolute;
+    right: 1rem;
 }
