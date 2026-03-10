@@ -35,14 +35,16 @@ class GetAndPost(Resource):
     # POST all
     def post(self):
         data = api.payload
+        if User.objects(user_id=data["user_id"]):
+            return {"error": "User ID already exists"}, 409
+        if User.objects(email=data["email"]):
+            return {"error": "Email already exists"}, 409
         user = User(
             user_id=data["user_id"],
             email=data["email"],
             first_name=data["first_name"],
             last_name=data["last_name"],
         )
-        # TODO: This is insecure. We should check to see if the user exists before
-        # trying to create them.
         user.set_password(data["password"])
         user.save()
         return jsonify(json.loads(User.objects(user_id=data["user_id"]).to_json()))
