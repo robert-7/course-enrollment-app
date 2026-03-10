@@ -11,7 +11,7 @@ services:
       - .:/app
     environment:
       - FLASK_DEBUG=true
-      - MONGO_URI=mongodb://mongodb:27017/NOU_Enrollment # TODO: this might not be needed
+      - MONGO_URI=mongodb://mongodb:27017/NOU_Enrollment
     depends_on:
       - mongodb
 

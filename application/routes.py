@@ -16,65 +16,9 @@ from application import app
 from application.course_list import course_list_for_user
 from application.forms import LoginForm
 from application.forms import RegisterForm
-from application.models import Course  # noqa: F401
-from application.models import Enrollment  # noqa: F401
+from application.models import Course
+from application.models import Enrollment
 from application.models import User
-
-# TODO: We should be using global strings within flash() functions
-
-# TODO: this should be removed, but it's still being read in
-courseData = [
-    {
-        "courseID": "CSC108",
-        "title": "Introduction to Computer Programming",
-        "description": (
-            "An introduction to computer programming using Python."
-            " Program structure, control flow, data types, and functions."
-        ),
-        "credits": 3,
-        "term": "Fall, Winter",
-    },
-    {
-        "courseID": "CSC148",
-        "title": "Introduction to Computer Science",
-        "description": (
-            "Abstract data types, object-oriented programming,"
-            " algorithm analysis, and linked data structures."
-        ),
-        "credits": 3,
-        "term": "Fall, Winter",
-    },
-    {
-        "courseID": "CSC207",
-        "title": "Software Design",
-        "description": (
-            "Design patterns, clean architecture, version control,"
-            " and agile methodologies for building software systems."
-        ),
-        "credits": 3,
-        "term": "Fall, Winter",
-    },
-    {
-        "courseID": "CSC209",
-        "title": "Software Tools and Systems Programming",
-        "description": (
-            "Shell scripting, processes, system calls,"
-            " and C programming for Unix-based systems."
-        ),
-        "credits": 3,
-        "term": "Fall",
-    },
-    {
-        "courseID": "CSC263",
-        "title": "Data Structures and Analysis",
-        "description": (
-            "Algorithm analysis, priority queues, sorting, hashing,"
-            " amortized analysis, and graph algorithms."
-        ),
-        "credits": 3,
-        "term": "Winter",
-    },
-]
 
 
 ###################################################
@@ -89,14 +33,16 @@ class GetAndPost(Resource):
     # POST all
     def post(self):
         data = api.payload
+        if User.objects(user_id=data["user_id"]):
+            return {"error": "User ID already exists"}, 409
+        if User.objects(email=data["email"]):
+            return {"error": "Email already exists"}, 409
         user = User(
             user_id=data["user_id"],
             email=data["email"],
             first_name=data["first_name"],
             last_name=data["last_name"],
         )
-        # TODO: This is insecure. We should check to see if the user exists before
-        # trying to create them.
         user.set_password(data["password"])
         user.save()
         return jsonify(json.loads(User.objects(user_id=data["user_id"]).to_json()))
@@ -125,7 +71,13 @@ class GetUpdateDelete(Resource):
 ###################################################
 
 
-@app.route("/")
+@app.before_request
+def redirect_root():
+    """Redirects root to /home."""
+    if request.path == "/":
+        return redirect(url_for("index"))
+
+
 @app.route("/home")
 @app.route("/index")
 def index():
@@ -226,13 +178,6 @@ def enrollment():
         title="Enrollment",
         classes=courses,
     )
-
-
-@app.route("/user")
-def user():
-    """Returns the users in our database."""
-    users = User.objects.all()
-    return render_template("user.html", users=users)
 
 
 @app.route("/favicon.ico")
