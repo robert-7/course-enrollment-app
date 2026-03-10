@@ -16,8 +16,7 @@ and a fully containerized Docker Compose setup.
 Make sure [Docker](https://docs.docker.com/get-docker/) is installed, then run:
 
 ```bash
-docker compose build
-docker compose up -d
+make run
 ```
 
 The app will be available at [http://localhost:5000](http://localhost:5000). The Swagger API docs are at [http://localhost:5000/api/docs](http://localhost:5000/api/docs).
@@ -25,8 +24,18 @@ The app will be available at [http://localhost:5000](http://localhost:5000). The
 To tear everything down:
 
 ```bash
-docker compose down -v
+make clean
 ```
+
+Other useful commands:
+
+| Command | Description |
+|---------|-------------|
+| `make run` | Build and start all containers |
+| `make test` | Run the test suite inside the Flask container |
+| `make seed` | Re-seed the database with course data |
+| `make lint` | Run linters via pre-commit |
+| `make clean` | Tear down containers and volumes |
 
 ## Contributing
 
