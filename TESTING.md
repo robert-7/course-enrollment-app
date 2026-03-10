@@ -3,7 +3,7 @@
 Assuming was started correctly, when implementing changes, here is an end-to-end
 test-case for assessing whether everything works:
 
-1. Bring up the environment as described in [SETUP.md](SETUP.md).
+1. Follow the steps in [CONTRIBUTING.md](CONTRIBUTING.md), then bring up the environment with `docker compose up -d --build`.
 1. Go to [home page](http://127.0.0.1:5000/index). The web page should load.
 1. Go to [the courses page](http://127.0.0.1:5000/courses).
    The web page should load and show 5 courses.
