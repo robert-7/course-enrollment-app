@@ -1,43 +1,67 @@
 # Course Enrollment App
 
+![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.1-lightgrey?logo=flask&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-8.2-green?logo=mongodb&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue?logo=docker&logoColor=white)
+
 A full-stack Flask web application for course enrollment with user
 authentication, MongoDB-backed data models, REST APIs with Swagger docs,
 and a fully containerized Docker Compose setup.
 
-## Getting Set Up
+![App Walkthrough](docs/walkthrough.gif)
 
-Please see [the setup documentation](SETUP.md) regarding this.
+## Quick Start
 
-## Features to try
+Make sure [Docker](https://docs.docker.com/get-docker/) is installed, then run:
 
-* You should be able to register a user. This can be done from the `/register` path.
-* You should be able to login as a user after registering. This can be done from the
-  `/login` path.
+```bash
+docker compose build
+docker compose up -d
+```
 
-## Folder and File Structure
+The app will be available at [http://localhost:5000](http://localhost:5000). The Swagger API docs are at [http://localhost:5000/api/docs](http://localhost:5000/api/docs).
 
-* [.github/workflows](.github/workflows) - Holds the GitHub Actions files that enables
-  CI/CD software workflows
-* [.postman](.postman) - Holds files related to Postman setup for API testing
-* [.vscode](.vscode) - Holds the Visual Studio Code settings for this project
-* [application](application) - Holds the application specific code for this project
-* [mongo-setup](mongo-setup) - Holds the files needed to populate our MongoDB instance
-* [.flake8](.flake8) - Configuration file for the flake8 Python linter
-* [.flaskenv](.flaskenv) - Defines some parameters that Flask needs to run
-* [.gitignore](.gitignore) - Defines the files/folders to ignore in this repository
-* [.markdownlint.rb](.markdownlint.rb) - Configuration file for the pre-commit markdown
-  linter
-* [.markdownlint.yaml](.markdownlint.rb) - Configuration file for the GitHub Actions
-  markdown linter
-* [.pre-commit-config.yaml](.pre-commit-config.yaml) - Defines the linting plugins that
-  run before any commit. See [SETUP.md](SETUP.md)
-* [config.py](config.py) - Defines the configurations for the server
-* [LICENSE](LICENSE) - Licensing file
-* [main.py](main.py) - Calls the application's entrypoint
-* [requirements.txt](requirements.txt) - Pip package requirements for enabling
-  developers to contribute. See [SETUP.md](SETUP.md)
-* [SETUP.md](SETUP.md) - Setup instructions for contributors
-* [TESTING.md](TESTING.md) - Instructions for manually validating the website functionality works.
+To tear everything down:
+
+```bash
+docker compose down -v
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for environment setup, linting, Postman, and other developer instructions.
+
+## Features
+
+- **User registration & login** — session-based auth with hashed passwords (Werkzeug)
+- **Course catalog** — browse courses pulled from MongoDB, filterable by term
+- **Course enrollment** — enroll in courses with duplicate-enrollment protection
+- **Enrollment dashboard** — view your enrolled courses via MongoDB aggregation
+- **REST API** — full CRUD for users at `/api` with Swagger UI docs (flask-restx)
+- **Dockerized stack** — Flask, MongoDB, and seed data orchestrated via Docker Compose
+- **CI/CD** — GitHub Actions workflows with pre-commit linting (flake8, markdownlint)
+
+Please see [the testing documentation](TESTING.md) that showcases an end-to-end demo of features supported.
+
+## Architecture
+
+The app runs as three Docker Compose services:
+
+| Service | Description |
+|---------|-------------|
+| **flask-app** | Python/Flask web server on port 5000 |
+| **mongodb** | MongoDB 8.2 database with persistent volume |
+| **mongo-seed** | One-shot container that imports course data on first run |
+
+```plaintext
+Browser :5000 ──► flask-app ──► mongodb :27017
+                                   ▲
+                              mongo-seed
+                          (imports courses.json)
+```
+
+The Flask app follows a single-module structure under [`application/`](application/README.md).
 
 ## Acknowledgments
 

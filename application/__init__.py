@@ -15,7 +15,7 @@ mongoengine.connect(
 )
 
 # initiate the API
-api = Api()
+api = Api(doc="/api/docs")
 api.init_app(app)
 
 from application import routes  # noqa: E402,F401

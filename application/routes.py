@@ -1,3 +1,4 @@
+import json
 import os
 
 from flask import flash
@@ -83,7 +84,7 @@ courseData = [
 class GetAndPost(Resource):
     # GET all
     def get(self):
-        return jsonify(User.objects.all())
+        return jsonify(json.loads(User.objects.all().to_json()))
 
     # POST all
     def post(self):
@@ -98,21 +99,21 @@ class GetAndPost(Resource):
         # trying to create them.
         user.set_password(data["password"])
         user.save()
-        return jsonify(User.objects(user_id=data["user_id"]))
+        return jsonify(json.loads(User.objects(user_id=data["user_id"]).to_json()))
 
 
 @api.route("/api/<idx>")
 class GetUpdateDelete(Resource):
     # GET one
     def get(self, idx):
-        return jsonify(User.objects(user_id=idx))
+        return jsonify(json.loads(User.objects(user_id=idx).to_json()))
 
     # PUT one
     def put(self, idx):
         data = api.payload
         user = User.objects(user_id=idx)
         user.update(**data)
-        return jsonify(User.objects(user_id=idx))
+        return jsonify(json.loads(User.objects(user_id=idx).to_json()))
 
     # DELETE one
     def delete(self, idx):
