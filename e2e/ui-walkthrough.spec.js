@@ -1,5 +1,10 @@
 const { test, expect } = require('@playwright/test');
 
+async function typeLikeUser(locator, value) {
+  await locator.click();
+  await locator.pressSequentially(value, { delay: 55 });
+}
+
 test('UI walkthrough from TESTING.md', async ({ page }) => {
   const suffix = Date.now();
   const email = `pw${suffix}@e.co`;
@@ -19,11 +24,11 @@ test('UI walkthrough from TESTING.md', async ({ page }) => {
   await page.goto('/register');
   await expect(page).toHaveURL(/\/register$/);
 
-  await page.locator('#email').fill(email);
-  await page.locator('#password').fill(password);
-  await page.locator('#password_confirm').fill(password);
-  await page.locator('#first_name').fill('Playwright');
-  await page.locator('#last_name').fill('Tester');
+  await typeLikeUser(page.locator('#email'), email);
+  await typeLikeUser(page.locator('#password'), password);
+  await typeLikeUser(page.locator('#password_confirm'), password);
+  await typeLikeUser(page.locator('#first_name'), 'Playwright');
+  await typeLikeUser(page.locator('#last_name'), 'Tester');
   await page.getByRole('button', { name: 'Register Now' }).click();
 
   await expect(page).toHaveURL(/\/index$/);
@@ -32,8 +37,8 @@ test('UI walkthrough from TESTING.md', async ({ page }) => {
   await page.goto('/login');
   await expect(page).toHaveURL(/\/login$/);
 
-  await page.locator('#email').fill(email);
-  await page.locator('#password').fill(password);
+  await typeLikeUser(page.locator('#email'), email);
+  await typeLikeUser(page.locator('#password'), password);
   await page.getByRole('button', { name: 'Login' }).click();
 
   await expect(page).toHaveURL(/\/index$/);

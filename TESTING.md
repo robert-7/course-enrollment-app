@@ -44,6 +44,12 @@ docker compose up -d --build
 npm run e2e:walkthrough
 ```
 
+For a viewer-friendly recording pace, use slow motion:
+
+```bash
+npm run e2e:walkthrough:demo
+```
+
 This executes [e2e/ui-walkthrough.spec.js](e2e/ui-walkthrough.spec.js) against
 `http://127.0.0.1:5000`.
 
@@ -52,6 +58,7 @@ This executes [e2e/ui-walkthrough.spec.js](e2e/ui-walkthrough.spec.js) against
 - `npm run e2e` : all Playwright tests (headless)
 - `npm run e2e:headed` : all Playwright tests (headed)
 - `npm run e2e:report` : open HTML test report
+- `npm run e2e:walkthrough:demo` : walkthrough with `PW_SLOWMO=400` for demos
 
 ### Artifacts and GIF export
 
@@ -63,4 +70,12 @@ Convert the generated `.webm` video to GIF:
 ffmpeg -i test-results/<run-folder>/video.webm \
    -vf "fps=12,scale=1200:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
    walkthrough.gif
+```
+
+If a recorded video still feels fast, slow playback during conversion:
+
+```bash
+ffmpeg -i test-results/<run-folder>/video.webm \
+   -vf "setpts=1.4*PTS,fps=12,scale=1200:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
+   walkthrough-slower.gif
 ```
