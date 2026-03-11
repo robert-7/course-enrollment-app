@@ -1,0 +1,32 @@
+{
+  "name": "course-enrollment-app",
+  "version": "1.0.0",
+  "description": "![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python&logoColor=white) ![Flask](https://img.shields.io/badge/Flask-3.1-lightgrey?logo=flask&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-8.2-green?logo=mongodb&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-Compose-blue?logo=docker&logoColor=white)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed --project=chromium",
+    "e2e:walkthrough": "playwright test e2e/ui-walkthrough.spec.js --headed --project=chromium",
+    "e2e:report": "playwright show-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robert-7/Course-Enrollment-App.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/robert-7/Course-Enrollment-App/issues"
+  },
+  "homepage": "https://github.com/robert-7/Course-Enrollment-App#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "eslint": "^10.0.3"
+  }
+}

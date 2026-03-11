@@ -19,3 +19,48 @@ test-case for assessing whether everything works:
 1. Go to [the courses page](http://127.0.0.1:5000/courses) and click "Enroll" for a course.
    You should be redirected to the [the enrollment page](http://127.0.0.1:5000/enrollment).
 1. Click the `Logout` navigation button and you should be logged out.
+
+## Automated E2E walkthrough (Playwright)
+
+The repository includes an automated UI walkthrough that mirrors the manual
+flow above.
+
+### One-time setup
+
+```bash
+npm install
+npx playwright install chromium
+```
+
+### Run the app (Docker)
+
+```bash
+docker compose up -d --build
+```
+
+### Run the automated walkthrough
+
+```bash
+npm run e2e:walkthrough
+```
+
+This executes [e2e/ui-walkthrough.spec.js](e2e/ui-walkthrough.spec.js) against
+`http://127.0.0.1:5000`.
+
+### Other useful commands
+
+- `npm run e2e` : all Playwright tests (headless)
+- `npm run e2e:headed` : all Playwright tests (headed)
+- `npm run e2e:report` : open HTML test report
+
+### Artifacts and GIF export
+
+Playwright outputs video and trace artifacts under `test-results/`.
+
+Convert the generated `.webm` video to GIF:
+
+```bash
+ffmpeg -i test-results/<run-folder>/video.webm \
+   -vf "fps=12,scale=1200:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
+   walkthrough.gif
+```

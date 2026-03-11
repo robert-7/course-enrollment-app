@@ -41,6 +41,22 @@ Other useful commands:
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for environment setup, linting, Postman, and other developer instructions.
 
+## E2E Testing (Playwright)
+
+This repo includes an automated UI walkthrough test:
+[e2e/ui-walkthrough.spec.js](e2e/ui-walkthrough.spec.js).
+
+Quick run:
+
+```bash
+npm install
+npx playwright install chromium
+docker compose up -d --build
+npm run e2e:walkthrough
+```
+
+For full details, see [TESTING.md](TESTING.md).
+
 ## Features
 
 - **User registration & login** — session-based auth with hashed passwords (Werkzeug)

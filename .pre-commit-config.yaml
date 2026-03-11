@@ -48,16 +48,27 @@ repos:
 
   # markdown linting
   - repo: https://github.com/markdownlint/markdownlint
-    rev: v0.13.0 # NOTE: v0.15.0 is giving a headache with pre-commit
+    rev: v0.13.0  # NOTE: v0.15.0 is giving a headache with pre-commit
     hooks:
       - id: markdownlint
         entry: mdl --style .markdownlint.rb
+        exclude: ^node_modules/
 
   # CSS linting
   - repo: https://github.com/pre-commit/mirrors-csslint
     rev: v1.0.5
     hooks:
       - id: csslint
+        files: ^application/static/css/.*\.css$
+
+  # JavaScript linting
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v10.0.3
+    hooks:
+      - id: eslint
+        files: \.js$
+        types: [file]
+        args: ['--max-warnings=0']
 
   # YAML linting
   - repo: https://github.com/adrienverge/yamllint
