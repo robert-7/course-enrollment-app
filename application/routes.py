@@ -1,6 +1,7 @@
 import json
 import os
 
+from bson.json_util import RELAXED_JSON_OPTIONS
 from flask import flash
 from flask import jsonify
 from flask import redirect
@@ -28,7 +29,9 @@ from application.models import User
 class GetAndPost(Resource):
     # GET all
     def get(self):
-        return jsonify(json.loads(User.objects.all().to_json()))
+        return jsonify(
+            json.loads(User.objects.all().to_json(json_options=RELAXED_JSON_OPTIONS))
+        )
 
     # POST all
     def post(self):
@@ -45,21 +48,35 @@ class GetAndPost(Resource):
         )
         user.set_password(data["password"])
         user.save()
-        return jsonify(json.loads(User.objects(user_id=data["user_id"]).to_json()))
+        return jsonify(
+            json.loads(
+                User.objects(user_id=data["user_id"]).to_json(
+                    json_options=RELAXED_JSON_OPTIONS
+                )
+            )
+        )
 
 
 @api.route("/api/<idx>")
 class GetUpdateDelete(Resource):
     # GET one
     def get(self, idx):
-        return jsonify(json.loads(User.objects(user_id=idx).to_json()))
+        return jsonify(
+            json.loads(
+                User.objects(user_id=idx).to_json(json_options=RELAXED_JSON_OPTIONS)
+            )
+        )
 
     # PUT one
     def put(self, idx):
         data = api.payload
         user = User.objects(user_id=idx)
         user.update(**data)
-        return jsonify(json.loads(User.objects(user_id=idx).to_json()))
+        return jsonify(
+            json.loads(
+                User.objects(user_id=idx).to_json(json_options=RELAXED_JSON_OPTIONS)
+            )
+        )
 
     # DELETE one
     def delete(self, idx):

@@ -12,6 +12,7 @@ app.config.from_object(Config)
 mongoengine.connect(
     db=app.config["MONGODB_SETTINGS"]["db"],
     host=app.config["MONGODB_SETTINGS"]["host"],
+    uuidRepresentation="standard",
 )
 
 # initiate the API

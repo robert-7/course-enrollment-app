@@ -4,7 +4,7 @@ from application.models import User
 def course_list_for_user(user_id):
     courses = list(
         User.objects.aggregate(
-            *[
+            [
                 {
                     "$lookup": {
                         "from": "enrollment",
