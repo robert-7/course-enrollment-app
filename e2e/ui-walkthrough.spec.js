@@ -1,6 +1,12 @@
 const { test, expect } = require('@playwright/test');
 
+const FAST_INPUT = process.env.PW_FAST_INPUT === '1';
+
 async function typeLikeUser(locator, value) {
+  if (FAST_INPUT) {
+    await locator.fill(value);
+    return;
+  }
   await locator.click();
   await locator.pressSequentially(value, { delay: 55 });
 }

@@ -1,5 +1,5 @@
 ---
-name: lint
+name: ci
 on:  # yamllint disable-line rule:truthy
   push:
     branches: [main]
@@ -11,7 +11,7 @@ on:  # yamllint disable-line rule:truthy
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  pre-commit:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.1

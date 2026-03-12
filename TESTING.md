@@ -73,6 +73,18 @@ docker compose up -d --build
 npm run e2e:walkthrough
 ```
 
+For a faster walkthrough (normal input speed, no extra per-character typing delay):
+
+```bash
+npm run e2e:walkthrough:fast
+```
+
+From Makefile:
+
+```bash
+make e2e-fast
+```
+
 For a viewer-friendly recording pace, use slow motion:
 
 ```bash
@@ -87,7 +99,10 @@ This executes [e2e/ui-walkthrough.spec.js](e2e/ui-walkthrough.spec.js) against
 - `npm run e2e` : all Playwright tests (headless)
 - `npm run e2e:headed` : all Playwright tests (headed)
 - `npm run e2e:report` : open HTML test report
+- `npm run e2e:walkthrough:fast` : walkthrough with fast form input (`PW_FAST_INPUT=1`)
 - `npm run e2e:walkthrough:demo` : walkthrough with `PW_SLOWMO=400` for demos
+- `make e2e-fast` : fast walkthrough via Makefile target
+- `make e2e-demo` : demo walkthrough via Makefile target
 
 ### Artifacts and GIF export
 

@@ -38,10 +38,6 @@ def _reset_collections():
     User.drop_collection()
     Course.drop_collection()
     Enrollment.drop_collection()
-    yield
-    User.drop_collection()
-    Course.drop_collection()
-    Enrollment.drop_collection()
 
 
 @pytest.fixture

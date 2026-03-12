@@ -63,31 +63,73 @@ def test_api_post_rejects_duplicate_user_id(client):
     assert response.get_json()["error"] == "User ID already exists"
 
 
-def test_api_get_put_delete_single_user(client):
+def test_api_post_rejects_duplicate_email(client):
     user = User(
-        user_id=9,
-        email="single@example.com",
+        user_id=5,
+        email="taken@example.com",
+        first_name="First",
+        last_name="Owner",
+    )
+    user.set_password("secret12")
+    user.save()
+
+    response = client.post(
+        "/api",
+        json={
+            "user_id": 6,
+            "email": "taken@example.com",
+            "first_name": "Second",
+            "last_name": "Owner",
+            "password": "secret12",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.get_json()["error"] == "Email already exists"
+
+
+def _create_user(user_id=9, email="single@example.com"):
+    user = User(
+        user_id=user_id,
+        email=email,
         first_name="Single",
         last_name="User",
     )
     user.set_password("secret12")
     user.save()
+    return user
 
-    get_response = client.get("/api/9")
-    assert get_response.status_code == 200
-    assert get_response.get_json()[0]["email"] == "single@example.com"
 
-    put_response = client.put(
+def test_api_get_single_user(client):
+    _create_user()
+
+    response = client.get("/api/9")
+
+    assert response.status_code == 200
+    assert response.get_json()[0]["email"] == "single@example.com"
+
+
+def test_api_put_updates_user(client):
+    _create_user()
+
+    response = client.put(
         "/api/9",
         json={
             "first_name": "Updated",
             "last_name": "Name",
         },
     )
-    assert put_response.status_code == 200
-    assert put_response.get_json()[0]["first_name"] == "Updated"
 
-    delete_response = client.delete("/api/9")
-    assert delete_response.status_code == 200
-    assert delete_response.get_json() == "User is deleted!"
+    assert response.status_code == 200
+    assert response.get_json()[0]["first_name"] == "Updated"
+    assert response.get_json()[0]["last_name"] == "Name"
+
+
+def test_api_delete_removes_user(client):
+    _create_user()
+
+    response = client.delete("/api/9")
+
+    assert response.status_code == 200
+    assert response.get_json() == "User is deleted!"
     assert User.objects(user_id=9).count() == 0

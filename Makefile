@@ -1,4 +1,4 @@
-.PHONY: run test seed lint clean
+.PHONY: run test e2e-demo e2e-fast seed lint clean
 
 ## Start the app
 run:
@@ -7,6 +7,14 @@ run:
 ## Run the test suite (requires pytest in requirements.txt)
 test:
 	docker compose exec flask-app python -m pytest
+
+## Run end-to-end demo test
+e2e-demo:
+	npm run e2e:walkthrough:demo
+
+## Run end-to-end walkthrough quickly
+e2e-fast:
+	npm run e2e:walkthrough:fast
 
 ## Re-seed the database
 seed:
