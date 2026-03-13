@@ -1,5 +1,8 @@
 # Course Enrollment App
 
+[![CI](https://github.com/robert-7/Course-Enrollment-App/actions/workflows/main.yml/badge.svg)](https://github.com/robert-7/Course-Enrollment-App/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/robert-7/Course-Enrollment-App/graph/badge.svg)](https://codecov.io/gh/robert-7/Course-Enrollment-App)
+
 ![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3.1-lightgrey?logo=flask&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-8.2-green?logo=mongodb&logoColor=white)
@@ -88,12 +91,12 @@ The app runs as three Docker Compose services:
 
 | Service | Description |
 |---------|-------------|
-| **flask-app** | Python/Flask web server on port 5000 |
+| **course-enrollment-app** | Python/Flask web server on port 5000 |
 | **mongodb** | MongoDB 8.2 database with persistent volume |
 | **mongo-seed** | One-shot container that imports course data on first run |
 
 ```plaintext
-Browser :5000 ──► flask-app ──► mongodb :27017
+Browser :5000 ──► course-enrollment-app ──► mongodb :27017
                                    ▲
                               mongo-seed
                           (imports courses.json)

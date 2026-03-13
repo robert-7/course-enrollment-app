@@ -6,7 +6,7 @@ run:
 
 ## Run the test suite (requires pytest in requirements.txt)
 test:
-	docker compose exec flask-app python -m pytest
+	docker compose exec course-enrollment-app python -m pytest
 
 ## Run end-to-end demo test
 e2e-demo:
