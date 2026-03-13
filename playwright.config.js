@@ -1,6 +1,7 @@
 const { defineConfig, devices } = require('@playwright/test');
 
 const slowMo = Number.parseInt(process.env.PW_SLOWMO || '0', 10);
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:5000';
 
 module.exports = defineConfig({
   testDir: './e2e',
@@ -10,7 +11,7 @@ module.exports = defineConfig({
   },
   reporter: [['html', { open: 'never' }], ['list']],
   use: {
-    baseURL: 'http://127.0.0.1:5000',
+    baseURL,
     headless: true,
     launchOptions: {
       slowMo: Number.isNaN(slowMo) ? 0 : slowMo,

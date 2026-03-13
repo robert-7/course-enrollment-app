@@ -11,6 +11,7 @@
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed --project=chromium",
     "e2e:walkthrough": "playwright test e2e/ui-walkthrough.spec.js --headed --project=chromium",
+    "e2e:walkthrough:fast": "PW_FAST_INPUT=1 playwright test e2e/ui-walkthrough.spec.js --headed --project=chromium",
     "e2e:walkthrough:demo": "PW_SLOWMO=600 playwright test e2e/ui-walkthrough.spec.js --headed --project=chromium",
     "e2e:report": "playwright show-report"
   },

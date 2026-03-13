@@ -14,6 +14,18 @@ services:
       - MONGO_URI=mongodb://mongodb:27017/NOU_Enrollment
     depends_on:
       - mongodb
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/index').read()",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
 
   mongodb:
     image: mongo:8.2
@@ -36,6 +48,20 @@ services:
       - ./mongo-setup:/mongo-setup:rw
     command:
       /mongo-setup/mongo-setup.sh
+
+  e2e-tests:
+    image: mcr.microsoft.com/playwright:v1.58.2-noble
+    working_dir: /work
+    volumes:
+      - .:/work
+    environment:
+      - PLAYWRIGHT_BASE_URL=http://flask-app:5000
+      - PW_FAST_INPUT=1
+    depends_on:
+      flask-app:
+        condition: service_healthy
+    command: >
+      sh -lc "npm ci && npx playwright test e2e/ui-walkthrough.spec.js --project=chromium"
 
 volumes:
   mongodb:

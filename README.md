@@ -46,7 +46,20 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for environment setup, linting, Postman, 
 This repo includes an automated UI walkthrough test:
 [e2e/ui-walkthrough.spec.js](e2e/ui-walkthrough.spec.js).
 
-Quick run:
+Quick run (Docker-only, no local npm install needed):
+
+```bash
+docker compose up -d --build
+docker compose run --rm e2e-tests
+```
+
+Equivalent Make command:
+
+```bash
+make e2e-docker
+```
+
+Local Playwright run (if you want to run from host machine):
 
 ```bash
 npm install

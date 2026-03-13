@@ -1,0 +1,147 @@
+from application.models import Enrollment
+from application.models import User
+
+
+def test_index_page_loads(client):
+    response = client.get("/index")
+
+    assert response.status_code == 200
+
+
+def test_home_page_loads(client):
+    response = client.get("/home")
+
+    assert response.status_code == 200
+
+
+def test_root_redirects_to_index(client):
+    response = client.get("/", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/index")
+
+
+def test_courses_route_renders_courses(client, seed_courses):
+    response = client.get("/courses")
+
+    assert response.status_code == 200
+    assert b"Course Offerings" in response.data
+    assert b"Intro to Testing" in response.data
+
+
+def test_register_creates_user_and_redirects(client):
+    response = client.post(
+        "/register",
+        data={
+            "email": "newuser@example.com",
+            "password": "secret12",
+            "password_confirm": "secret12",
+            "first_name": "New",
+            "last_name": "User",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/index")
+    assert User.objects(email="newuser@example.com").count() == 1
+
+
+def test_login_success_sets_session_and_redirects(client, registered_user):
+    response = client.post(
+        "/login",
+        data={
+            "email": registered_user.email,
+            "password": "secret12",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/index")
+
+
+def test_login_failure_shows_error(client, registered_user):
+    response = client.post(
+        "/login",
+        data={
+            "email": registered_user.email,
+            "password": "wrongpass",
+        },
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert b"Sorry, something went wrong." in response.data
+
+
+def test_enrollment_requires_login(client):
+    response = client.get("/enrollment", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/login")
+
+
+def test_enrollment_creates_record_for_logged_in_user(logged_in_client, seed_courses):
+    response = logged_in_client.post(
+        "/enrollment",
+        data={
+            "courseID": "CSE100",
+            "title": "Intro to Testing",
+            "term": "Fall 2026",
+        },
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert b"You are enrolled in Intro to Testing!" in response.data
+    assert Enrollment.objects(user_id=1, courseID="CSE100").count() == 1
+
+
+def test_duplicate_enrollment_shows_error(logged_in_client, seed_courses):
+    Enrollment(user_id=1, courseID="CSE100").save()
+
+    response = logged_in_client.post(
+        "/enrollment",
+        data={
+            "courseID": "CSE100",
+            "title": "Intro to Testing",
+            "term": "Fall 2026",
+        },
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert b"Oops! You are already registered in course" in response.data
+
+
+def test_courses_with_explicit_term(client, seed_courses):
+    response = client.get("/courses/Spring 2027")
+
+    assert response.status_code == 200
+    assert b"Spring 2027" in response.data
+
+
+def test_logout_clears_session_and_redirects(logged_in_client):
+    response = logged_in_client.get("/logout", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/index")
+
+    response = logged_in_client.get("/enrollment", follow_redirects=False)
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/login")
+
+
+def test_login_redirects_when_already_logged_in(logged_in_client):
+    response = logged_in_client.get("/login", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/index")
+
+
+def test_register_redirects_when_already_logged_in(logged_in_client):
+    response = logged_in_client.get("/register", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/index")
