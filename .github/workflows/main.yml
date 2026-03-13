@@ -42,4 +42,4 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.1
       - name: Build Docker image using Docker Compose
-        run: docker compose build flask-app
+        run: docker compose build course-enrollment-app

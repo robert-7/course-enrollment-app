@@ -1,10 +1,10 @@
 ---
 services:
-  flask-app:
+  course-enrollment-app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: flask-app
+    container_name: course-enrollment-app
     ports:
       - 5000:5000
     volumes:
@@ -55,10 +55,10 @@ services:
     volumes:
       - .:/work
     environment:
-      - PLAYWRIGHT_BASE_URL=http://flask-app:5000
+      - PLAYWRIGHT_BASE_URL=http://course-enrollment-app:5000
       - PW_FAST_INPUT=1
     depends_on:
-      flask-app:
+      course-enrollment-app:
         condition: service_healthy
     command: >
       sh -lc "npm ci && npx playwright test e2e/ui-walkthrough.spec.js --project=chromium"
