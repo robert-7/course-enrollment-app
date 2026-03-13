@@ -30,4 +30,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run test suite
-        run: pytest --cov=application --cov-report=term-missing
+        run: pytest --cov=application --cov-report=term-missing --cov-report=xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.1
+      - name: Build Docker image using Docker Compose
+        run: docker compose build flask-app

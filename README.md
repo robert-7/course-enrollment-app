@@ -1,5 +1,8 @@
 # Course Enrollment App
 
+[![CI](https://github.com/robert-7/Course-Enrollment-App/actions/workflows/main.yml/badge.svg)](https://github.com/robert-7/Course-Enrollment-App/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/robert-7/Course-Enrollment-App/graph/badge.svg)](https://codecov.io/gh/robert-7/Course-Enrollment-App)
+
 ![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3.1-lightgrey?logo=flask&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-8.2-green?logo=mongodb&logoColor=white)
