@@ -28,6 +28,7 @@ e2e-fast:
 ## Run end-to-end walkthrough in Docker (no local npm required)
 e2e-docker:
 	docker compose run --rm e2e-tests
+	@sudo chown -R $$(id -u):$$(id -g) playwright-report test-results
 
 ## Re-seed the database
 seed:
