@@ -35,6 +35,29 @@ git clone git@github.com:robert-7/Course-Enrollment-App.git
 cd Course-Enrollment-App
 ```
 
+## Environment Variables
+
+The app requires a `SECRET_KEY` environment variable to be set before starting.
+This key is used by Flask for session signing and CSRF protection — it must be
+a strong random value and must **not** be hardcoded or committed to source control.
+
+Run the setup command to generate a `.env` file with a fresh key automatically:
+
+```bash
+make setup
+```
+
+This creates a `.env` file at the project root (already gitignored) with:
+
+```bash
+# .env
+SECRET_KEY=<randomly generated value>
+```
+
+Docker Compose automatically loads `.env`, so `make run` will pick it up.
+If `.env` already exists, `make setup` is a no-op — delete the file first to
+regenerate.
+
 ## Virtual Environment
 
 ```bash

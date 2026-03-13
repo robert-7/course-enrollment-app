@@ -1,4 +1,13 @@
-.PHONY: run test e2e-demo e2e-fast e2e-docker seed lint clean
+.PHONY: run test e2e-demo e2e-fast e2e-docker seed lint clean setup
+
+## Generate .env with a random SECRET_KEY (skips if .env already exists)
+setup:
+	@if [ -f .env ]; then \
+		echo ".env already exists — skipping. Delete it first to regenerate."; \
+	else \
+		echo "SECRET_KEY=$$(python3 -c 'import secrets; print(secrets.token_hex(32))')" > .env; \
+		echo ".env created with a fresh SECRET_KEY."; \
+	fi
 
 ## Start the app
 run:
@@ -19,6 +28,7 @@ e2e-fast:
 ## Run end-to-end walkthrough in Docker (no local npm required)
 e2e-docker:
 	docker compose run --rm e2e-tests
+	@sudo chown -R $$(id -u):$$(id -g) playwright-report test-results
 
 ## Re-seed the database
 seed:

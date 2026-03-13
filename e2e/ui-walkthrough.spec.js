@@ -52,7 +52,12 @@ test('UI walkthrough from TESTING.md', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Login' })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Logout' })).toBeVisible();
 
-  // 7-8. Enroll in the first available course.
+  // 7. Authenticated API access: course list is accessible when logged in.
+  await page.goto('/api/v1/courses');
+  await expect(page).toHaveURL(/\/api\/v1\/courses$/);
+  await expect(page.locator('body')).toContainText('courseID');
+
+  // 8-9. Enroll in the first available course.
   await page.goto('/courses');
   await expect(page).toHaveURL(/\/courses$/);
   await page.locator('table tbody tr').first().getByRole('button', { name: 'Enroll' }).click();
@@ -60,8 +65,19 @@ test('UI walkthrough from TESTING.md', async ({ page }) => {
   await expect(page).toHaveURL(/\/enrollment$/);
   await expect(page.getByRole('heading', { name: 'Enrollment' })).toBeVisible();
 
-  // 9. Logout and verify logged-out state.
+  // 10. Authenticated API access: enrolled course still appears in the course list.
+  await page.goto('/api/v1/courses');
+  await expect(page).toHaveURL(/\/api\/v1\/courses$/);
+  await expect(page.locator('body')).toContainText('courseID');
+
+  // 11. Logout and verify logged-out state.
+  await page.goto('/index');
   await page.getByRole('link', { name: 'Logout' }).click();
   await expect(page).toHaveURL(/\/index$/);
   await expect(page.locator('nav').getByRole('link', { name: 'Login' })).toBeVisible();
+
+  // 12. API access is blocked after logout.
+  const apiResponseAfterLogout = await page.goto('/api/v1/courses');
+  expect(apiResponseAfterLogout.status()).toBe(401);
+  await expect(page.locator('body')).toContainText('Authentication required');
 });
