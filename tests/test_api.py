@@ -1,5 +1,4 @@
 from application.models import Course
-from application.models import User
 
 
 def test_api_root_redirects_to_docs(client):
@@ -15,7 +14,21 @@ def test_api_docs_page_loads(client):
     assert response.status_code == 200
 
 
-def test_api_courses_lists_courses(client):
+def test_api_courses_requires_auth(client):
+    response = client.get("/api/v1/courses")
+
+    assert response.status_code == 401
+    assert response.get_json()["error"] == "Authentication required"
+
+
+def test_api_course_by_id_requires_auth(client):
+    response = client.get("/api/v1/courses/CSE100")
+
+    assert response.status_code == 401
+    assert response.get_json()["error"] == "Authentication required"
+
+
+def test_api_courses_lists_courses(logged_in_client):
     Course(
         courseID="CSE200",
         title="Web Systems",
@@ -31,7 +44,7 @@ def test_api_courses_lists_courses(client):
         term="Fall 2026",
     ).save()
 
-    response = client.get("/api/v1/courses")
+    response = logged_in_client.get("/api/v1/courses")
 
     assert response.status_code == 200
     payload = response.get_json()
@@ -40,7 +53,7 @@ def test_api_courses_lists_courses(client):
     assert payload[1]["courseID"] == "CSE200"
 
 
-def test_api_course_by_id_returns_single_course(client):
+def test_api_course_by_id_returns_single_course(logged_in_client):
     Course(
         courseID="MTH101",
         title="Discrete Math",
@@ -49,7 +62,7 @@ def test_api_course_by_id_returns_single_course(client):
         term="Spring 2027",
     ).save()
 
-    response = client.get("/api/v1/courses/MTH101")
+    response = logged_in_client.get("/api/v1/courses/MTH101")
 
     assert response.status_code == 200
     payload = response.get_json()
@@ -57,24 +70,15 @@ def test_api_course_by_id_returns_single_course(client):
     assert payload[0]["title"] == "Discrete Math"
 
 
-def test_api_course_by_id_returns_404_for_missing_course(client):
-    response = client.get("/api/v1/courses/NOPE999")
+def test_api_course_by_id_returns_404_for_missing_course(logged_in_client):
+    response = logged_in_client.get("/api/v1/courses/NOPE999")
 
     assert response.status_code == 404
     assert response.get_json()["error"] == "Course not found"
 
 
-def test_api_courses_does_not_return_users(client):
-    user = User(
-        user_id=1,
-        email="apiuser@example.com",
-        first_name="Api",
-        last_name="User",
-    )
-    user.set_password("secret12")
-    user.save()
-
-    response = client.get("/api/v1/courses")
+def test_api_courses_does_not_return_users(logged_in_client):
+    response = logged_in_client.get("/api/v1/courses")
 
     assert response.status_code == 200
     assert response.get_json() == []

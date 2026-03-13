@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # Set before importing the Flask app module, which connects at import-time.
 os.environ.setdefault("MONGO_URI", "mongodb://localhost:27017/course_enrollment")
+os.environ.setdefault("SECRET_KEY", "test-secret-key-do-not-use-in-production")
 
 # Delayed imports are required: app initialization reads env/path at import-time.
 from application import app  # noqa: E402

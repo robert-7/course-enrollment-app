@@ -1,3 +1,4 @@
+import functools
 import json
 import os
 
@@ -22,11 +23,25 @@ from application.models import Enrollment
 from application.models import User
 
 
+def login_required_api(f):
+    """Reject unauthenticated requests to API endpoints with 401."""
+
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get("username"):
+            return {"error": "Authentication required"}, 401
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
 ###################################################
 
 
 @api.route("/courses", "/courses/")
 class CoursesApi(Resource):
+    method_decorators = [login_required_api]
+
     def get(self):
         courses = Course.objects.order_by("+courseID")
         return jsonify(json.loads(courses.to_json(json_options=RELAXED_JSON_OPTIONS)))
@@ -34,6 +49,8 @@ class CoursesApi(Resource):
 
 @api.route("/courses/<course_id>")
 class CourseApi(Resource):
+    method_decorators = [login_required_api]
+
     def get(self, course_id):
         course = Course.objects(courseID=course_id)
         if not course:

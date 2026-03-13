@@ -22,7 +22,7 @@ Make sure [Docker](https://docs.docker.com/get-docker/) is installed, then run:
 make run
 ```
 
-The app will be available at [http://localhost:5000](http://localhost:5000). The Swagger API docs are at [http://localhost:5000/api/docs](http://localhost:5000/api/docs).
+The app will be available at [http://localhost:5000](http://localhost:5000). The Swagger API docs are at [http://localhost:5000/api/v1/docs](http://localhost:5000/api/v1/docs).
 
 To tear everything down:
 
@@ -34,6 +34,7 @@ Other useful commands:
 
 | Command | Description |
 |---------|-------------|
+| `make setup` | Generate `.env` with a random `SECRET_KEY` (first-time setup) |
 | `make run` | Build and start all containers |
 | `make test` | Run the test suite inside the Flask container |
 | `make seed` | Re-seed the database with course data |
@@ -77,9 +78,9 @@ For full details, see [TESTING.md](TESTING.md).
 
 - **User registration & login** — session-based auth with hashed passwords (Werkzeug)
 - **Course catalog** — browse courses pulled from MongoDB, filterable by term
-- **Course enrollment** — enroll in courses with duplicate-enrollment protection
+- **Course enrollment** — enroll in courses with duplicate-enrollment protection, CSRF-protected form
 - **Enrollment dashboard** — view your enrolled courses via MongoDB aggregation
-- **REST API** — full CRUD for users at `/api` with Swagger UI docs (flask-restx)
+- **REST API** — authenticated course endpoints at `/api/v1/courses` with Swagger UI docs (flask-restx)
 - **Dockerized stack** — Flask, MongoDB, and seed data orchestrated via Docker Compose
 - **CI/CD** — GitHub Actions workflows with pre-commit linting (flake8, markdownlint)
 

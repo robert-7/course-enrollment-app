@@ -1,12 +1,16 @@
 import mongoengine
 from flask import Flask
 from flask_restx import Api
+from flask_wtf.csrf import CSRFProtect
 
 from config import Config
 
 # initiate the main web app
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# enable CSRF protection for all POST forms
+csrf = CSRFProtect(app)
 
 # initiate the mongo engine
 mongoengine.connect(
