@@ -125,9 +125,7 @@ Playwright outputs video and trace artifacts under `test-results/`.
 Convert the generated `.webm` video to GIF:
 
 ```bash
-ffmpeg -i test-results/<run-folder>/video.webm \
-   -vf "fps=12,scale=1200:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
-   walkthrough.gif
+ffmpeg -i test-results/ui-walkthrough-UI-walkthrough-from-TESTING-md-chromium/video.webm   -vf "fps=12,scale=900:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer:bayer_scale=5"   docs/walkthrough-2.gif
 ```
 
 If a recorded video still feels fast, slow playback during conversion:
