@@ -14,15 +14,15 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
-      - uses: actions/setup-python@v6.1.0
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-python@v6.2.0
       - uses: pre-commit/action@v3.0.1
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
-      - uses: actions/setup-python@v6.1.0
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-python@v6.2.0
         with:
           python-version: "3.13"
       - name: Install dependencies
@@ -30,9 +30,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run test suite
-        run: pytest --cov=application --cov-report=term-missing --cov-report=xml
+        run: pytest --cov=application --cov-report=term-missing --cov-report=xml --cov-fail-under=100
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v5.5.2
         with:
           files: ./coverage.xml
           fail_ci_if_error: false
@@ -42,7 +42,7 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Build Docker image using Docker Compose
         run: docker compose build course-enrollment-app
 
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - name: Build and start app services
         run: docker compose up -d --build course-enrollment-app mongodb
       - name: Seed MongoDB data
@@ -59,7 +59,7 @@ jobs:
         run: docker compose run --rm e2e-tests
       - name: Upload Playwright artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: playwright-artifacts
           path: |

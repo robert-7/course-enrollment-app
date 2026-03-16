@@ -145,3 +145,34 @@ def test_register_redirects_when_already_logged_in(logged_in_client):
 
     assert response.status_code == 302
     assert response.headers["Location"].endswith("/index")
+
+
+def test_register_get_renders_form(client):
+    response = client.get("/register")
+
+    assert response.status_code == 200
+    assert b"Register" in response.data
+
+
+def test_register_duplicate_email_renders_form_with_error(client, registered_user):
+    response = client.post(
+        "/register",
+        data={
+            "email": registered_user.email,
+            "password": "secret12",
+            "password_confirm": "secret12",
+            "first_name": "Adam",
+            "last_name": "Smith",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 200
+    assert b"Email is already in user" in response.data
+
+
+def test_favicon_returns_icon(client):
+    response = client.get("/favicon.ico")
+
+    assert response.status_code == 200
+    assert response.content_type == "image/vnd.microsoft.icon"

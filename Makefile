@@ -1,4 +1,4 @@
-.PHONY: run test e2e-demo e2e-fast e2e-docker seed lint clean setup
+.PHONY: run test codecov e2e-demo e2e-fast e2e-docker seed lint clean setup
 
 ## Generate .env with a random SECRET_KEY (skips if .env already exists)
 setup:
@@ -13,9 +13,13 @@ setup:
 run:
 	docker compose up -d --build
 
-## Run the test suite (requires pytest in requirements.txt)
+## Run the test suite
 test:
 	docker compose exec course-enrollment-app python -m pytest
+
+## Run the test suite with coverage report
+codecov:
+	docker compose exec course-enrollment-app python -m pytest --cov=application --cov-report=term-missing --cov-fail-under=100
 
 ## Run end-to-end demo test
 e2e-demo:
