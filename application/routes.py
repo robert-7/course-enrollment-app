@@ -179,9 +179,12 @@ def enrollment():
 
 @app.route("/favicon.ico")
 def favicon():
-    """Sends the favicon.ico file."""
+    """Sends the favicon.ico file.
+
+    Needed to avoid 404 errors in the logs when browsers request the favicon.
+    """
     return send_from_directory(
-        os.path.join(app.root_path, "static"),
-        "favicon.ico",
+        directory=os.path.join(app.root_path, "static"),
+        path="favicon.ico",
         mimetype="image/vnd.microsoft.icon",
     )
