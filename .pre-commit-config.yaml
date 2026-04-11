@@ -19,7 +19,7 @@ repos:
         args: ['--no-sort-keys', '--autofix']
         exclude: '.postman/collection.json'
       - id: file-contents-sorter
-        args: ['--unique']
+        args: ['--ignore-case']
         files: '^(\.dockerignore|requirements\.txt|requirements-dev\.txt)$'
 
   # python linting
