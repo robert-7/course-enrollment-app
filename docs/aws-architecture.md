@@ -1,4 +1,4 @@
-# AWS Architecture -- Course Enrollment App
+# AWS Architecture for the Course Enrollment App
 
 This document is the single source of truth for the AWS deployment design of the Course Enrollment App.
 It captures architecture decisions, the system diagram, cost estimates, and the release strategy.
@@ -13,7 +13,7 @@ It captures architecture decisions, the system diagram, cost estimates, and the 
 |---|---|
 | **Decision** | ECS Fargate |
 | **Alternatives considered** | EC2, EKS, App Runner |
-| **Rationale** | Serverless containers -- no EC2 patching, scales to zero when desired count is set to 0 (ideal for demo/cost control), and is the cheapest managed container option at this scale. |
+| **Rationale** | ECS Fargate is a serverless container runtime -- AWS manages the underlying EC2 fleet, eliminating OS patching and capacity planning. Tasks can scale to zero by setting the desired count to 0, reducing cost to ~$0 when not demoing. See the [ECS launch type comparison](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html) and [Fargate pricing](https://aws.amazon.com/fargate/pricing/). EKS adds Kubernetes complexity with no benefit at this scale; App Runner is simpler but less configurable for custom networking. |
 
 ---
 
@@ -23,7 +23,7 @@ It captures architecture decisions, the system diagram, cost estimates, and the 
 |---|---|
 | **Decision** | MongoDB Atlas M0 (free cluster) |
 | **Alternatives considered** | AWS DocumentDB, self-hosted MongoDB on EC2 |
-| **Rationale** | Free tier eliminates database cost entirely. Fully compatible with MongoEngine (the ORM already used by the app), so no application rewrite is required. |
+| **Rationale** | MongoDB Atlas M0 is a [permanently free tier](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/) with 512 MB storage, sufficient for a demo. It is fully wire-compatible with MongoEngine (the ORM already in use), so no application changes are required. AWS DocumentDB is only compatible with the MongoDB 4.0 API and starts at ~$50/month; self-hosting on EC2 adds operational overhead and cost with no advantage. |
 
 ---
 
@@ -33,7 +33,7 @@ It captures architecture decisions, the system diagram, cost estimates, and the 
 |---|---|
 | **Decision** | AWS SSM Parameter Store (Standard tier) |
 | **Alternatives considered** | AWS Secrets Manager, environment variables embedded in the ECS task definition |
-| **Rationale** | Standard-tier parameters are free, versus Secrets Manager at $0.40/secret/month. Embedding secrets in the task definition is insecure and harder to rotate. SSM is adequate for this scale. |
+| **Rationale** | [SSM Parameter Store Standard tier](https://aws.amazon.com/systems-manager/pricing/) is free for up to 10,000 parameters -- the cheapest secure option available. Environment variables embedded directly in an ECS task definition are exposed in plaintext via the ECS API and AWS console, making them visible to any IAM principal with `ecs:DescribeTaskDefinition`. [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/) adds automatic rotation and cross-account sharing but costs $0.40/secret/month, which is unnecessary for a short-lived demo. Both `SECRET_KEY` and `MONGO_URI` are stored here: the Atlas connection string embeds credentials (`mongodb+srv://user:password@cluster/`), making it sensitive despite looking like a plain URI. |
 
 ---
 
@@ -43,7 +43,7 @@ It captures architecture decisions, the system diagram, cost estimates, and the 
 |---|---|
 | **Decision** | GitHub Actions OIDC federation (keyless) |
 | **Alternatives considered** | IAM access keys stored as GitHub Secrets |
-| **Rationale** | No long-lived credentials to rotate or leak. GitHub-native support makes configuration straightforward. Follows AWS and GitHub best-practice guidance for CI/CD authentication. |
+| **Rationale** | [OpenID Connect (OIDC)](https://openid.net/connect/) is an identity layer on top of OAuth 2.0 that lets GitHub Actions prove its identity to AWS IAM using a short-lived token -- no static credentials are stored anywhere. This follows the [AWS IAM best practice of using temporary credentials for workloads](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#bp-workloads-use-roles) and GitHub's [recommended approach for AWS deployments](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services). Long-lived IAM access keys stored as GitHub Secrets are a common source of credential leaks and require manual rotation. |
 
 ---
 
@@ -53,7 +53,7 @@ It captures architecture decisions, the system diagram, cost estimates, and the 
 |---|---|
 | **Decision** | AWS CDK (Python) |
 | **Alternatives considered** | Terraform, CloudFormation (raw YAML/JSON), AWS SAM |
-| **Rationale** | Same language as the application, so contributors need only one language. CDK provides high-level constructs that reduce boilerplate compared to raw CloudFormation, and `cdk destroy` makes teardown straightforward. |
+| **Rationale** | [Terraform](https://developer.hashicorp.com/terraform) is the more widely adopted IaC tool across the industry (multi-cloud, large ecosystem), but it requires learning HCL in addition to Python. [AWS CDK (Python)](https://docs.aws.amazon.com/cdk/v2/guide/home.html) was chosen because contributors need only one language, and its high-level constructs (e.g. `ecs_patterns.ApplicationLoadBalancedFargateService`) reduce boilerplate significantly versus raw [CloudFormation](https://aws.amazon.com/cloudformation/) YAML. [AWS SAM](https://aws.amazon.com/serverless/sam/) is optimised for Lambda/serverless workloads and is not a natural fit for a long-running Fargate service. The main tradeoff is that CDK is AWS-only and requires Node.js at synth time even for Python apps -- acceptable for a single-cloud demo. `cdk destroy` also makes full teardown of all provisioned resources trivial. |
 
 ---
 
@@ -63,7 +63,7 @@ It captures architecture decisions, the system diagram, cost estimates, and the 
 |---|---|
 | **Decision** | Application Load Balancer (ALB) |
 | **Alternatives considered** | Network Load Balancer (NLB), CloudFront |
-| **Rationale** | ALB provides HTTP/HTTPS routing and integrates natively with ECS service discovery. It is covered by the AWS free tier for the first 12 months (750 hours/month). CloudFront is unnecessary overhead for an internal/demo app. |
+| **Rationale** | ALB provides layer-7 HTTP/HTTPS routing and [integrates natively with ECS service discovery](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-load-balancing.html), including health checks and graceful task draining during deployments. The [AWS free tier covers 750 ALB-hours/month for the first 12 months](https://aws.amazon.com/elasticloadbalancing/pricing/), making it effectively free during initial evaluation. NLB operates at layer 4 (TCP) and lacks HTTP-level routing; CloudFront adds CDN caching which provides no benefit for a dynamic Flask app without static asset distribution requirements. |
 
 ---
 
@@ -97,6 +97,17 @@ flowchart TD
 
     ECR -.->|"pulls image"| ECS
 ```
+
+> **Why is `MONGO_URI` a secret?** MongoDB Atlas connection strings embed credentials directly in the URI
+> (e.g. `mongodb+srv://user:password@cluster.mongodb.net/`). Despite looking like a plain address, the URI
+> is sensitive and must not be stored in the ECS task definition, where it would be visible in plaintext
+> via the AWS console and ECS API. Storing it in SSM Standard tier costs nothing.
+>
+> **Why CloudWatch Logs?** CloudWatch is the native log driver for ECS Fargate
+> ([`awslogs` driver](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html))
+> and requires no extra infrastructure or agents. The [free tier](https://aws.amazon.com/cloudwatch/pricing/)
+> covers 5 GB of log ingestion per month -- far more than a low-traffic demo will generate. Alternative
+> aggregators (Datadog, Splunk, Grafana Cloud) all require paid plans at this scale.
 
 ---
 
