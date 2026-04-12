@@ -39,12 +39,19 @@ services:
     ports:
       - 27017:27017
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   mongo-seed:
     image: mongo:8.2
     container_name: mongo-setup
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     volumes:
       - ./mongo-setup:/mongo-setup:rw
     command:

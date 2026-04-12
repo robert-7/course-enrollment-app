@@ -11,7 +11,8 @@ mongoimport --host "${HOST}" \
             --collection "${collection}" \
             --type json \
             --file "${json_file_path}" \
-            --jsonArray
+            --jsonArray \
+            --drop
 echo "Done setting ${collection} collection."
 
 collection="course"
@@ -22,5 +23,6 @@ mongoimport --host "${HOST}" \
             --collection "${collection}" \
             --type json \
             --file "${json_file_path}" \
-            --jsonArray
+            --jsonArray \
+            --drop
 echo "Done setting ${collection} collection."
