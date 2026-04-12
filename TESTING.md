@@ -7,7 +7,7 @@ Automated tests are the primary verification method for this repository.
 1. Install Python dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 1. Run the full suite:

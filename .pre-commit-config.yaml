@@ -18,6 +18,9 @@ repos:
       - id: pretty-format-json
         args: ['--no-sort-keys', '--autofix']
         exclude: '.postman/collection.json'
+      - id: file-contents-sorter
+        args: ['--ignore-case']
+        files: '^(\.dockerignore|requirements\.txt|requirements-dev\.txt)$'
 
   # python linting
   - repo: https://github.com/psf/black
@@ -76,6 +79,12 @@ repos:
         files: \.js$
         types: [file]
         args: ['--max-warnings=0']
+
+  # shell linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
 
   # YAML linting
   - repo: https://github.com/adrienverge/yamllint

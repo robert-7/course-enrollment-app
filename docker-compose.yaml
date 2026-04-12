@@ -39,12 +39,19 @@ services:
     ports:
       - 27017:27017
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   mongo-seed:
     image: mongo:8.2
     container_name: mongo-setup
-    links:
-      - mongodb
+    depends_on:
+      mongodb:
+        condition: service_healthy
     volumes:
       - ./mongo-setup:/mongo-setup:rw
     command:
@@ -61,6 +68,8 @@ services:
     depends_on:
       course-enrollment-app:
         condition: service_healthy
+      mongo-seed:
+        condition: service_completed_successfully
     command: >
       sh -lc "npm ci && npx playwright test e2e/ui-walkthrough.spec.js --project=chromium"
 

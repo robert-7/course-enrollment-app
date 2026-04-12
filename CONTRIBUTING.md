@@ -66,7 +66,7 @@ python -m venv '.venv'
 source .venv/bin/activate
 
 # install requirements
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 # set up pre-commit so basic linting happens before every commit
 pre-commit install
