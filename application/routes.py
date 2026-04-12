@@ -15,6 +15,7 @@ from flask_restx import Resource
 
 from application import api
 from application import app
+from application import limiter
 from application.course_list import course_list_for_user
 from application.forms import LoginForm
 from application.forms import RegisterForm
@@ -83,6 +84,7 @@ def index():
 
 
 @app.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])
 def login():
     """Returns the login page content."""
     if session.get("username"):
@@ -123,6 +125,7 @@ def courses(term=None):
 
 
 @app.route("/register", methods=["POST", "GET"])
+@limiter.limit("5 per minute", methods=["POST"])
 def register():
     """Returns the registration page content."""
     if session.get("username"):

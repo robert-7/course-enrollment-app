@@ -16,6 +16,7 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key-do-not-use-in-production")
 
 # Delayed imports are required: app initialization reads env/path at import-time.
 from application import app  # noqa: E402
+from application import limiter  # noqa: E402
 from application.models import Course  # noqa: E402
 from application.models import Enrollment  # noqa: E402
 from application.models import User  # noqa: E402
@@ -46,7 +47,10 @@ def _reset_collections():
 def test_app():
     app.config.update(
         WTF_CSRF_ENABLED=False,
+        RATELIMIT_ENABLED=False,
     )
+    limiter.reset()
+    limiter.enabled = False
     return app
 
 

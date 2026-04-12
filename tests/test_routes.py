@@ -1,3 +1,4 @@
+from application import limiter
 from application.models import Enrollment
 from application.models import User
 
@@ -7,6 +8,15 @@ def _session_cookie_header(response):
         if header.startswith("session="):
             return header
     raise AssertionError("Expected a session cookie in the response")
+
+
+def _post_from_ip(client, path, data, remote_addr, follow_redirects=False):
+    return client.post(
+        path,
+        data=data,
+        follow_redirects=follow_redirects,
+        environ_overrides={"REMOTE_ADDR": remote_addr},
+    )
 
 
 def test_index_page_loads(client):
@@ -70,6 +80,73 @@ def test_register_creates_user_and_redirects(client):
     assert response.status_code == 302
     assert response.headers["Location"].endswith("/index")
     assert User.objects(email="newuser@example.com").count() == 1
+
+
+def test_register_requires_valid_email_address(client):
+    response = client.post(
+        "/register",
+        data={
+            "email": "not-an-email",
+            "password": "secret123",
+            "password_confirm": "secret123",
+            "first_name": "New",
+            "last_name": "User",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 200
+    assert b"Invalid email address." in response.data
+    assert User.objects(email="not-an-email").count() == 0
+
+
+def test_register_rejects_passwords_shorter_than_eight_characters(client):
+    response = client.post(
+        "/register",
+        data={
+            "email": "newuser@example.com",
+            "password": "abc1234",
+            "password_confirm": "abc1234",
+            "first_name": "New",
+            "last_name": "User",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 200
+    assert b"Field must be between 8 and 128 characters long." in response.data
+    assert User.objects(email="newuser@example.com").count() == 0
+
+
+def test_register_and_login_accept_long_passwords(client):
+    long_password = "correct-horse-battery-staple-with-extra-entropy-1234567890"
+
+    register_response = client.post(
+        "/register",
+        data={
+            "email": "longpass@example.com",
+            "password": long_password,
+            "password_confirm": long_password,
+            "first_name": "Long",
+            "last_name": "Pass",
+        },
+        follow_redirects=False,
+    )
+
+    assert register_response.status_code == 302
+    assert register_response.headers["Location"].endswith("/index")
+
+    login_response = client.post(
+        "/login",
+        data={
+            "email": "longpass@example.com",
+            "password": long_password,
+        },
+        follow_redirects=False,
+    )
+
+    assert login_response.status_code == 302
+    assert login_response.headers["Location"].endswith("/index")
 
 
 def test_login_success_sets_session_and_redirects(client, registered_user):
@@ -161,6 +238,37 @@ def test_login_failure_shows_error(client, registered_user):
 
     assert response.status_code == 200
     assert b"Sorry, something went wrong." in response.data
+
+
+def test_login_rate_limits_post_attempts(client, monkeypatch, registered_user):
+    limiter.reset()
+    monkeypatch.setattr(limiter, "enabled", True)
+
+    for _ in range(5):
+        response = _post_from_ip(
+            client,
+            "/login",
+            data={
+                "email": registered_user.email,
+                "password": "wrongpass",
+            },
+            remote_addr="198.51.100.10",
+            follow_redirects=False,
+        )
+        assert response.status_code == 200
+
+    response = _post_from_ip(
+        client,
+        "/login",
+        data={
+            "email": registered_user.email,
+            "password": "wrongpass",
+        },
+        remote_addr="198.51.100.10",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 429
 
 
 def test_enrollment_requires_login(client):
@@ -263,6 +371,43 @@ def test_register_duplicate_email_renders_form_with_error(client, registered_use
 
     assert response.status_code == 200
     assert b"Email is already in user" in response.data
+
+
+def test_register_rate_limits_post_attempts(client, monkeypatch):
+    limiter.reset()
+    monkeypatch.setattr(limiter, "enabled", True)
+
+    for _ in range(5):
+        response = _post_from_ip(
+            client,
+            "/register",
+            data={
+                "email": "not-an-email",
+                "password": "secret123",
+                "password_confirm": "secret123",
+                "first_name": "Rate",
+                "last_name": "Limited",
+            },
+            remote_addr="198.51.100.11",
+            follow_redirects=False,
+        )
+        assert response.status_code == 200
+
+    response = _post_from_ip(
+        client,
+        "/register",
+        data={
+            "email": "not-an-email",
+            "password": "secret123",
+            "password_confirm": "secret123",
+            "first_name": "Rate",
+            "last_name": "Limited",
+        },
+        remote_addr="198.51.100.11",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 429
 
 
 def test_favicon_returns_icon(client):

@@ -15,20 +15,20 @@ from application.models import User
 class LoginForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField(
-        "Password", validators=[DataRequired(), Length(min=6, max=15)]
+        "Password", validators=[DataRequired(), Length(min=8, max=128)]
     )
     remember_me = BooleanField("Remember Me")
     submit = SubmitField("Login")
 
 
 class RegisterForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField(
-        "Password", validators=[DataRequired(), Length(min=6, max=15)]
+        "Password", validators=[DataRequired(), Length(min=8, max=128)]
     )
     password_confirm = PasswordField(
         "Confirm Password",
-        validators=[DataRequired(), Length(min=6, max=15), EqualTo("password")],
+        validators=[DataRequired(), Length(min=8, max=128), EqualTo("password")],
     )
     first_name = StringField(
         "First Name", validators=[DataRequired(), Length(min=2, max=55)]
@@ -39,8 +39,7 @@ class RegisterForm(FlaskForm):
     submit = SubmitField("Register Now")
 
     def validate_email(self, email):
-        # this throws an error for some reason
         user = User.objects(email=email.data)
         user = user.first()
         if user:
-            raise ValidationError("Email is already in user. Pick another one.")
+            raise ValidationError("Email is already in use. Pick another one.")

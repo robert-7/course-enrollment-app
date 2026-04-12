@@ -1,5 +1,7 @@
 import mongoengine
 from flask import Flask
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_restx import Api
 from flask_wtf.csrf import CSRFProtect
 
@@ -8,9 +10,14 @@ from config import get_config_for_env
 # initiate the main web app
 app = Flask(__name__)
 app.config.from_object(get_config_for_env())
+app.config.setdefault("RATELIMIT_STORAGE_URI", "memory://")
 
 # enable CSRF protection for all POST forms
 csrf = CSRFProtect(app)
+
+# rate limit authentication POSTs without requiring extra infra in development
+limiter = Limiter(key_func=get_remote_address)
+limiter.init_app(app)
 
 # initiate the mongo engine
 mongoengine.connect(
