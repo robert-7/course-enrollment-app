@@ -95,6 +95,8 @@ def login():
         user = User.objects(email=email).first()
         if user and user.get_password(password):
             flash("You are successfully logged in!", "success")
+            # Make this a permanent Flask session so the 30-minute lifetime applies.
+            session.permanent = True
             session["user_id"] = user.user_id
             session["username"] = user.first_name
             return redirect("/index")

@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 
 def _get_secret_key():
@@ -13,12 +14,19 @@ def _get_secret_key():
 
 
 class BaseConfig:
+    # Flask debug mode enables the interactive debugger and auto-reload.
     DEBUG = False
+    # Flask testing mode enables test-friendly behavior in the framework.
     TESTING = False
+    # Permanent sessions expire 30 minutes after their last refresh.
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
+    # Lax allows normal site navigation while reducing cross-site cookie sends.
     SESSION_COOKIE_SAMESITE = "Lax"
+    # Secure cookies are sent only over HTTPS.
     SESSION_COOKIE_SECURE = False
 
     def __init__(self):
+        # SECRET_KEY signs session and CSRF data, so it must come from the env.
         self.SECRET_KEY = _get_secret_key()
         # MONGODB_SETTINGS is what Flask-MongoEngine looks for this conf key
         # for setting up the connection to the database.

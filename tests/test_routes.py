@@ -115,6 +115,22 @@ def test_login_sets_lax_samesite_cookie_attribute(client, registered_user):
     assert "SameSite=Lax" in _session_cookie_header(response)
 
 
+def test_login_marks_session_permanent_and_sets_expiry_cookie(client, registered_user):
+    response = client.post(
+        "/login",
+        data={
+            "email": registered_user.email,
+            "password": "secret12",
+        },
+        follow_redirects=False,
+    )
+
+    with client.session_transaction() as session:
+        assert session.permanent is True
+
+    assert "Expires=" in _session_cookie_header(response)
+
+
 def test_login_failure_shows_error(client, registered_user):
     response = client.post(
         "/login",
