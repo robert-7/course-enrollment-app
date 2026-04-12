@@ -10,6 +10,7 @@ services:
     volumes:
       - .:/app
     environment:
+      # Local development only. Never set FLASK_DEBUG in production.
       - FLASK_DEBUG=true
       - MONGO_URI=mongodb://mongodb:27017/NOU_Enrollment
       - SECRET_KEY=local-dev-secret-change-in-production

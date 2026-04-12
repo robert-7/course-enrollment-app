@@ -12,6 +12,9 @@ def test_api_docs_page_loads(client):
     response = client.get("/api/v1/docs")
 
     assert response.status_code == 200
+    assert response.headers["Content-Security-Policy"].startswith("default-src 'self'")
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    assert response.headers["X-Frame-Options"] == "DENY"
 
 
 def test_api_courses_requires_auth(client):

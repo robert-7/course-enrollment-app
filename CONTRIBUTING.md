@@ -49,6 +49,9 @@ APP_ENV=testing      # used by pytest
 APP_ENV=production   # required for HTTPS deployments so session cookies are Secure
 ```
 
+`FLASK_DEBUG` is a local development convenience only. Do not set it in ECS
+task definitions, SSM parameters, or any production environment.
+
 Run the setup command to generate a `.env` file with a fresh key automatically:
 
 ```bash

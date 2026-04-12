@@ -28,6 +28,24 @@ def test_root_redirects_to_index(client):
     assert response.headers["Location"].endswith("/index")
 
 
+def test_index_sets_security_headers(client):
+    response = client.get("/index")
+
+    assert response.headers["Content-Security-Policy"].startswith("default-src 'self'")
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    assert response.headers["X-Frame-Options"] == "DENY"
+    assert "Strict-Transport-Security" not in response.headers
+
+
+def test_index_sets_hsts_header_when_enabled(client, monkeypatch):
+    monkeypatch.setitem(client.application.config, "ENABLE_HSTS", True)
+    monkeypatch.setitem(client.application.config, "HSTS_MAX_AGE", 600)
+
+    response = client.get("/index")
+
+    assert response.headers["Strict-Transport-Security"] == "max-age=600"
+
+
 def test_courses_route_renders_courses(client, seed_courses):
     response = client.get("/courses")
 
@@ -193,10 +211,16 @@ def test_courses_with_explicit_term(client, seed_courses):
 
 
 def test_logout_clears_session_and_redirects(logged_in_client):
+    with logged_in_client.session_transaction() as session:
+        session["extra_key"] = "leftover"
+
     response = logged_in_client.get("/logout", follow_redirects=False)
 
     assert response.status_code == 302
     assert response.headers["Location"].endswith("/index")
+
+    with logged_in_client.session_transaction() as session:
+        assert dict(session) == {}
 
     response = logged_in_client.get("/enrollment", follow_redirects=False)
     assert response.status_code == 302

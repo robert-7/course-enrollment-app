@@ -107,8 +107,7 @@ def login():
 
 @app.route("/logout")
 def logout():
-    session["user_id"] = False
-    session.pop("username", None)
+    session.clear()
     return redirect(url_for("index"))
 
 

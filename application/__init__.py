@@ -23,4 +23,19 @@ mongoengine.connect(
 api = Api(prefix="/api/v1", doc="/api/v1/docs")
 api.init_app(app)
 
+
+@app.after_request
+def apply_security_headers(response):
+    response.headers["Content-Security-Policy"] = app.config["CONTENT_SECURITY_POLICY"]
+    response.headers["X-Content-Type-Options"] = app.config["X_CONTENT_TYPE_OPTIONS"]
+    response.headers["X-Frame-Options"] = app.config["X_FRAME_OPTIONS"]
+
+    if app.config["ENABLE_HSTS"]:
+        response.headers["Strict-Transport-Security"] = (
+            f"max-age={app.config['HSTS_MAX_AGE']}"
+        )
+
+    return response
+
+
 from application import routes  # noqa: E402,F401

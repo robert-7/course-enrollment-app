@@ -27,6 +27,8 @@ The app will be available at [http://localhost:5000](http://localhost:5000). The
 Local Docker runs can leave `APP_ENV` unset, which defaults to `development`.
 HTTPS deployments on AWS must set `APP_ENV=production` so Flask marks session
 cookies as `Secure`.
+`FLASK_DEBUG=true` is for local Docker only and must never be set for
+production deployments.
 
 To tear everything down:
 
