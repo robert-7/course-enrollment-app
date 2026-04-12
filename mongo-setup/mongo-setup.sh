@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 HOST=mongodb            # Taken from docker-compose
 DB=NOU_Enrollment       # Taken from config.py
 MOUNT_PATH=/mongo-setup # Taken from docker-compose

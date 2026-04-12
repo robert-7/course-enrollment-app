@@ -80,6 +80,12 @@ repos:
         types: [file]
         args: ['--max-warnings=0']
 
+  # shell linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+
   # YAML linting
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.37.1
