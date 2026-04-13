@@ -19,9 +19,15 @@ seed_collection() {
   echo "Done setting ${collection} collection."
 }
 
+drop_collection() {
+  local collection="$1"
+  echo "Dropping stale ${collection} data..."
+
+  mongosh --host "${HOST}" --eval "db.getSiblingDB('${DB}').${collection}.drop()"
+
+  echo "Done dropping ${collection} collection."
+}
+
 seed_collection "user"   "${MOUNT_PATH}/users.json"
 seed_collection "course" "${MOUNT_PATH}/courses.json"
-
-echo "Dropping stale enrollment data..."
-mongosh --host "${HOST}" --eval "db.getSiblingDB('${DB}').enrollment.drop()"
-echo "Done dropping enrollment collection."
+drop_collection "enrollment"
