@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Sequence
 
 import aws_cdk as cdk
@@ -23,7 +24,9 @@ class CourseEnrollmentAppStack(cdk.Stack):
         vpc_id: str,
         public_subnet_ids: Sequence[str],
         certificate_arn: str,
+        github_oidc_provider_arn: str,
         image_tag: str,
+        bootstrap_use_local_image: bool,
         secret_key_value: str,
         mongo_uri_value: str,
         **kwargs,
@@ -41,10 +44,10 @@ class CourseEnrollmentAppStack(cdk.Stack):
         mongo_uri_parameter_name = "/course-enrollment-app/MONGO_URI"
 
         vpc = ec2.Vpc.from_lookup(self, "Vpc", vpc_id=vpc_id)
-        public_subnets = [
-            ec2.Subnet.from_subnet_id(self, f"PublicSubnet{index + 1}", subnet_id)
-            for index, subnet_id in enumerate(public_subnet_ids)
-        ]
+        public_subnet_selection = ec2.SubnetSelection(
+            subnet_filters=[ec2.SubnetFilter.by_ids(list(public_subnet_ids))]
+        )
+        repository_root = Path(__file__).resolve().parent.parent
 
         repository = ecr.Repository(
             self,
@@ -54,15 +57,22 @@ class CourseEnrollmentAppStack(cdk.Stack):
             image_scan_on_push=False,
             encryption=ecr.RepositoryEncryption.AES_256,
             removal_policy=RemovalPolicy.DESTROY,
-            auto_delete_images=True,
+            empty_on_delete=True,
         )
 
-        oidc_provider = iam.OpenIdConnectProvider(
-            self,
-            "GitHubOidcProvider",
-            url="https://token.actions.githubusercontent.com",
-            client_ids=["sts.amazonaws.com"],
-        )
+        if github_oidc_provider_arn:
+            oidc_provider = iam.OpenIdConnectProvider.from_open_id_connect_provider_arn(
+                self,
+                "GitHubOidcProvider",
+                github_oidc_provider_arn,
+            )
+        else:
+            oidc_provider = iam.OpenIdConnectProvider(
+                self,
+                "GitHubOidcProvider",
+                url="https://token.actions.githubusercontent.com",
+                client_ids=["sts.amazonaws.com"],
+            )
 
         github_actions_role = iam.Role(
             self,
@@ -102,6 +112,12 @@ class CourseEnrollmentAppStack(cdk.Stack):
                     "service-role/AmazonECSTaskExecutionRolePolicy"
                 )
             ],
+        )
+        task_role = iam.Role(
+            self,
+            "TaskRole",
+            description="Application task role for course-enrollment-app ECS tasks.",
+            assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
         )
 
         secret_key_parameter_resource = self._secure_string_parameter(
@@ -213,7 +229,7 @@ class CourseEnrollmentAppStack(cdk.Stack):
             internet_facing=True,
             load_balancer_name=alb_name,
             security_group=alb_security_group,
-            vpc_subnets=ec2.SubnetSelection(subnets=public_subnets),
+            vpc_subnets=public_subnet_selection,
         )
 
         target_group = elbv2.ApplicationTargetGroup(
@@ -242,12 +258,40 @@ class CourseEnrollmentAppStack(cdk.Stack):
             cpu=256,
             memory_limit_mib=512,
             execution_role=task_execution_role,
+            task_role=task_role,
         )
+        if bootstrap_use_local_image:
+            container_image = ecs.ContainerImage.from_asset(
+                str(repository_root),
+                exclude=[
+                    ".git",
+                    ".github",
+                    ".pytest_cache",
+                    ".venv",
+                    "__pycache__",
+                    "infra/.venv",
+                    "infra/cdk.out",
+                    "infra/cdk.out*",
+                    "node_modules",
+                    "playwright-report",
+                    "test-results",
+                ],
+                ignore_mode=cdk.IgnoreMode.DOCKER,
+            )
+        else:
+            if not image_tag:
+                raise RuntimeError(
+                    "CDK_IMAGE_TAG is required when "
+                    "CDK_BOOTSTRAP_USE_LOCAL_IMAGE is false."
+                )
+            container_image = ecs.ContainerImage.from_ecr_repository(
+                repository, tag=image_tag
+            )
 
         container = task_definition.add_container(
             "ApplicationContainer",
             container_name=app_name,
-            image=ecs.ContainerImage.from_ecr_repository(repository, tag=image_tag),
+            image=container_image,
             environment={"APP_ENV": "production"},
             secrets={
                 "SECRET_KEY": ecs.Secret.from_ssm_parameter(secret_key_parameter),
@@ -280,7 +324,7 @@ class CourseEnrollmentAppStack(cdk.Stack):
             desired_count=1,
             assign_public_ip=True,
             security_groups=[task_security_group],
-            vpc_subnets=ec2.SubnetSelection(subnets=public_subnets),
+            vpc_subnets=public_subnet_selection,
             circuit_breaker=ecs.DeploymentCircuitBreaker(
                 enable=True,
                 rollback=True,
@@ -297,7 +341,7 @@ class CourseEnrollmentAppStack(cdk.Stack):
             )
         )
 
-        elbv2.CfnListener(
+        https_listener = elbv2.CfnListener(
             self,
             "HttpsListener",
             load_balancer_arn=load_balancer.load_balancer_arn,
@@ -315,7 +359,7 @@ class CourseEnrollmentAppStack(cdk.Stack):
             ],
         )
 
-        elbv2.CfnListener(
+        http_redirect_listener = elbv2.CfnListener(
             self,
             "HttpRedirectListener",
             load_balancer_arn=load_balancer.load_balancer_arn,
@@ -335,6 +379,11 @@ class CourseEnrollmentAppStack(cdk.Stack):
                 )
             ],
         )
+
+        service.node.add_dependency(load_balancer)
+        service.node.add_dependency(target_group)
+        service.node.add_dependency(https_listener)
+        service.node.add_dependency(http_redirect_listener)
 
         github_actions_role.add_to_policy(
             iam.PolicyStatement(
@@ -375,7 +424,7 @@ class CourseEnrollmentAppStack(cdk.Stack):
         github_actions_role.add_to_policy(
             iam.PolicyStatement(
                 actions=["iam:PassRole"],
-                resources=[task_execution_role.role_arn],
+                resources=[task_execution_role.role_arn, task_role.role_arn],
             )
         )
 
@@ -410,6 +459,7 @@ class CourseEnrollmentAppStack(cdk.Stack):
         return cr.AwsCustomResource(
             self,
             construct_id,
+            install_latest_aws_sdk=False,
             on_create=cr.AwsSdkCall(
                 service="SSM",
                 action="putParameter",
