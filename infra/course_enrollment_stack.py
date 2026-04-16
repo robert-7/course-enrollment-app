@@ -24,6 +24,7 @@ class CourseEnrollmentAppStack(cdk.Stack):
         vpc_id: str,
         public_subnet_ids: Sequence[str],
         certificate_arn: str,
+        github_oidc_provider_arn: str,
         image_tag: str,
         bootstrap_use_local_image: bool,
         secret_key_value: str,
@@ -59,12 +60,19 @@ class CourseEnrollmentAppStack(cdk.Stack):
             empty_on_delete=True,
         )
 
-        oidc_provider = iam.OpenIdConnectProvider(
-            self,
-            "GitHubOidcProvider",
-            url="https://token.actions.githubusercontent.com",
-            client_ids=["sts.amazonaws.com"],
-        )
+        if github_oidc_provider_arn:
+            oidc_provider = iam.OpenIdConnectProvider.from_open_id_connect_provider_arn(
+                self,
+                "GitHubOidcProvider",
+                github_oidc_provider_arn,
+            )
+        else:
+            oidc_provider = iam.OpenIdConnectProvider(
+                self,
+                "GitHubOidcProvider",
+                url="https://token.actions.githubusercontent.com",
+                client_ids=["sts.amazonaws.com"],
+            )
 
         github_actions_role = iam.Role(
             self,

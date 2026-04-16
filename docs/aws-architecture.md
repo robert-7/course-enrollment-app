@@ -211,7 +211,6 @@ the stack.
 - Node.js and the AWS CDK CLI installed locally
 - Python 3.9+ available locally
 - An existing ACM certificate ARN for `course-enrollment-app.robertlech.com`
-- An existing image already pushed to the ECR repository
 
 AWS documents that the CDK CLI is installed with `npm install -g aws-cdk`, and
 that Python CDK apps use standard Python tooling and require Node.js at synth
@@ -225,12 +224,18 @@ Export the following values before synthesizing or deploying the stack:
 export CDK_VPC_ID=vpc-...
 export CDK_PUBLIC_SUBNET_IDS=subnet-...,subnet-...
 export CDK_CERTIFICATE_ARN=arn:aws:acm:us-east-1:...
+export CDK_GITHUB_OIDC_PROVIDER_ARN=arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com
 export CDK_IMAGE_TAG=<existing-ecr-image-tag>
 export CDK_SECRET_KEY=<strong-random-secret>
 export CDK_MONGO_URI=<mongodb-atlas-uri>
 ```
 
 An example file is provided at `infra/.env.example`.
+
+If the GitHub OIDC provider from the manual stack is still present in IAM,
+set `CDK_GITHUB_OIDC_PROVIDER_ARN` so CDK imports and reuses it. Leave that
+variable unset only when the provider has already been deleted and you want the
+stack to create a fresh one.
 
 ### Local usage
 
@@ -258,6 +263,8 @@ for more details on how to run it. That folder includes:
 
 - `validate_stack_is_up.sh` for pre-teardown and post-rebuild health checks
 - `remove_manual_stack.sh` for the one-time manual-stack removal
+- `validate_cdk_predeploy.sh` for the final pre-deploy guardrail check after
+  teardown and before `cdk deploy`
 - `validate_manual_stack_teardown_completed.sh` for post-teardown confirmation
 
 To tear the CDK-managed stack down:

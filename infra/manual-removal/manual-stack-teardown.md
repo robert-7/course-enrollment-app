@@ -21,6 +21,9 @@ This folder now includes two complementary validation scripts:
   and run it again after the CDK rebuild completes.
 - [`validate_manual_stack_teardown_completed.sh`](/home/robert/src/github.com/robert-7/course-enrollment-app/infra/manual-removal/validate_manual_stack_teardown_completed.sh)
   checks that the old manual resources are gone after teardown.
+- [`validate_cdk_predeploy.sh`](/home/robert/src/github.com/robert-7/course-enrollment-app/infra/manual-removal/validate_cdk_predeploy.sh)
+  checks the post-teardown prerequisites for the first `cdk deploy`, including
+  Docker, ACM certificate status, GitHub OIDC provider handling, and `cdk synth`.
 
 ## Assumptions
 
@@ -100,10 +103,12 @@ Before moving on to CDK deploy, run the dedicated verification script:
 
 ```bash
 bash infra/manual-removal/validate_manual_stack_teardown_completed.sh
+bash infra/manual-removal/validate_cdk_predeploy.sh
 ```
 
-That script checks that the main manual-stack resources are gone and exits
-non-zero if any of them still exist.
+The first script checks that the main manual-stack resources are gone and exits
+non-zero if any of them still exist. The second script verifies that the first
+CDK deploy is actually ready to proceed.
 
 ## Next Step
 
@@ -116,4 +121,7 @@ cdk deploy CourseEnrollmentAppStack
 
 For the first clean-room deploy, keep `CDK_BOOTSTRAP_USE_LOCAL_IMAGE=true` in
 `infra/.env` so CDK can bootstrap the ECS service from a locally built Docker
-image even though the rebuilt ECR repository starts empty.
+image even though the rebuilt ECR repository starts empty. If the GitHub OIDC
+provider from the manual stack still exists, set
+`CDK_GITHUB_OIDC_PROVIDER_ARN` in `infra/.env` so CDK reuses it instead of
+trying to create a duplicate provider.

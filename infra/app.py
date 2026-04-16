@@ -54,6 +54,7 @@ CourseEnrollmentAppStack(
     vpc_id=_required_env("CDK_VPC_ID"),
     public_subnet_ids=_required_subnet_ids(),
     certificate_arn=_required_env("CDK_CERTIFICATE_ARN"),
+    github_oidc_provider_arn=_optional_env("CDK_GITHUB_OIDC_PROVIDER_ARN"),
     image_tag=_optional_env("CDK_IMAGE_TAG"),
     bootstrap_use_local_image=_bool_env(
         "CDK_BOOTSTRAP_USE_LOCAL_IMAGE",
